@@ -1,6 +1,7 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-const axios = require('axios');
-require('dotenv').config();
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import axios from 'axios';
+import dotenv from 'dotenv';
+dotenv.config();
 
 console.log(process.env.GEMINI_API_KEY);
 console.log(process.env.HF_API_KEY);
@@ -102,4 +103,4 @@ async function generateImage(prompt) {
     }
 }
 
-module.exports = { generateScript, generateImage };
+export { generateScript, generateImage };

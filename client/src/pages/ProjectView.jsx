@@ -35,7 +35,7 @@ export default function ProjectView() {
         setGeneratingImages(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.post(`http://localhost:5000/api/projects/${id}/generate-images`, {}, {
+            const res = await axios.post(`http://localhost:5000/api/projects/generate-images/${id}`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setScenes(res.data.scenes || res.data);
@@ -55,8 +55,9 @@ export default function ProjectView() {
             {/* Header */}
             <header className="bg-white dark:bg-gray-800 shadow px-4 py-3 lg:px-6 lg:py-4 flex items-center justify-between z-10 transition-colors shrink-0">
                 <div className="flex items-center gap-3 lg:gap-4 overflow-hidden">
-                    <Link to="/" className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors shrink-0">
+                    <Link to="/" className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors shrink-0 flex items-center gap-2">
                         <ArrowLeft size={24} />
+                        <img src="/logo.png" alt="FrameAI Logo" className="w-8 h-8 rounded shadow-sm sm:block" />
                     </Link>
                     <div className="min-w-0">
                         <h1 className="text-lg lg:text-xl font-bold truncate text-gray-900 dark:text-white transition-colors">

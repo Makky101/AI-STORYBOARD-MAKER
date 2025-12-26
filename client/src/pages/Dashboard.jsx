@@ -34,7 +34,7 @@ export default function Dashboard() {
         setIsCreating(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.post('http://localhost:5000/api/projects',
+            const res = await axios.post('http://localhost:5000/api/projects/',
                 {
                     title: newProjectInput.substring(0, 30) + (newProjectInput.length > 30 ? '...' : ''),
                     input: newProjectInput
@@ -53,8 +53,9 @@ export default function Dashboard() {
     return (
         <div className="container mx-auto p-6 max-w-5xl">
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold flex items-center gap-2 dark:text-white transition-colors">
-                    <Film className="w-8 h-8 text-blue-600 dark:text-blue-400" /> My Storyboards
+                <h1 className="text-3xl font-bold flex items-center gap-3 dark:text-white transition-colors">
+                    <img src="/logo.png" alt="FrameAI Logo" className="w-10 h-10 rounded-lg shadow-sm" />
+                    FrameAI
                 </h1>
                 <div className="flex items-center gap-4">
                     <ThemeToggle />

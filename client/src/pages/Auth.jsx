@@ -3,11 +3,11 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 export default function Auth() {
+    const navigate = useNavigate();
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -17,11 +17,15 @@ export default function Auth() {
         try {
             const res = await axios.post(`http://localhost:5000${endpoint}`, { email, password });
 
-            if (res.data.token || isLogin) {
+            if (res.data.token || (!isLogin && res.data.id)) {
                 if (res.data.token) localStorage.setItem('token', res.data.token);
-                if (isLogin) navigate('/');
-                else {
+
+                if (isLogin) {
+                    navigate('/');
+                } else {
                     setIsLogin(true); // Switch to login after register
+                    setEmail(''); // Optional: clear email/password
+                    setPassword('');
                     alert('Registration successful! Please login.');
                 }
             }
@@ -33,6 +37,9 @@ export default function Auth() {
     return (
         <div className="flex h-screen items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors">
             <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md border dark:border-gray-700 transition-colors">
+                <div className="flex justify-center mb-6">
+                    <img src="/logo.png" alt="FrameAI Logo" className="w-16 h-16 rounded-xl shadow-lg ring-4 ring-blue-50 dark:ring-blue-900/30" />
+                </div>
                 <h2 className="text-2xl font-bold mb-6 text-center text-gray-900 dark:text-white transition-colors">
                     {isLogin ? 'Welcome Back' : 'Create Account'}
                 </h2>
