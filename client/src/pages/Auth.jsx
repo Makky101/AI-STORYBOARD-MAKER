@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 export default function Auth() {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const navigate = useNavigate();
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
@@ -15,18 +17,19 @@ export default function Auth() {
         const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
 
         try {
-            const res = await axios.post(`http://localhost:5000${endpoint}`, { email, password });
+            const res = await axios.post(`${API_URL}${endpoint}`, { email, password });
 
             if (res.data.token || (!isLogin && res.data.id)) {
                 if (res.data.token) localStorage.setItem('token', res.data.token);
 
                 if (isLogin) {
                     navigate('/');
+                    toast.success('Signed in successfully!');
                 } else {
-                    setIsLogin(true); // Switch to login after register
-                    setEmail(''); // Optional: clear email/password
+                    setIsLogin(true);
+                    setEmail('');
                     setPassword('');
-                    alert('Registration successful! Please login.');
+                    toast.success('Registration successful! Please login.');
                 }
             }
         } catch (err) {

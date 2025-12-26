@@ -119,7 +119,10 @@ router.delete('/:id', auth, async (req, res) => {
         const project = await db.query('SELECT * FROM projects WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
         if (project.rows.length === 0) return res.status(404).send('Project not found');
 
-        // 2. Delete project (scenes should be deleted via ON DELETE CASCADE in DB)
+        // 2. Delete scenes manually first (in case CASCADE is not set in DB)
+        await db.query('DELETE FROM scenes WHERE project_id = $1', [req.params.id]);
+
+        // 3. Delete project
         await db.query('DELETE FROM projects WHERE id = $1', [req.params.id]);
 
         res.json({ message: 'Project deleted successfully' });

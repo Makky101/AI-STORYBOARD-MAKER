@@ -3,8 +3,10 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { PlusCircle, Film, Trash2 } from 'lucide-react';
 import ThemeToggle from '../components/ThemeToggle';
+import toast from 'react-hot-toast';
 
 export default function Dashboard() {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const [projects, setProjects] = useState([]);
     const [newProjectInput, setNewProjectInput] = useState('');
     const [isCreating, setIsCreating] = useState(false);
@@ -17,7 +19,7 @@ export default function Dashboard() {
     const fetchProjects = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get('http://localhost:5000/api/projects', {
+            const res = await axios.get(`${API_URL}/api/projects`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setProjects(res.data);
@@ -34,17 +36,18 @@ export default function Dashboard() {
         setIsCreating(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.post('http://localhost:5000/api/projects/',
+            const res = await axios.post(`${API_URL}/api/projects/`,
                 {
                     title: newProjectInput.substring(0, 30) + (newProjectInput.length > 30 ? '...' : ''),
                     input: newProjectInput
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
+            toast.success('Project created!');
             navigate(`/project/${res.data.project.id}`);
         } catch (err) {
             console.error(err);
-            alert('Failed to create project');
+            toast.error('Failed to create project');
         } finally {
             setIsCreating(false);
         }
@@ -58,20 +61,21 @@ export default function Dashboard() {
 
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:5000/api/projects/${id}`, {
+            await axios.delete(`${API_URL}/api/projects/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setProjects(projects.filter(p => p.id !== id));
+            toast.success('Project deleted');
         } catch (err) {
             console.error(err);
-            alert('Failed to delete project');
+            toast.error('Failed to delete project');
         }
     };
 
     return (
         <div className="container mx-auto p-6 max-w-5xl">
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold flex items-center gap-3 dark:text-white transition-colors">
+                <h1 className="text-3xl font-bold flex items-center gap-3 dark:text-white transition-colors" style={{ fontFamily: "'Outfit', sans-serif" }}>
                     <img src="/logo.png" alt="FrameAI Logo" className="w-10 h-10 rounded-lg shadow-sm" />
                     FrameAI
                 </h1>
@@ -114,13 +118,17 @@ export default function Dashboard() {
             {/* Projects Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {projects.map((project) => (
-                    <Link to={`/project/${project.id}`} key={project.id} className="block group relative">
+                    <div
+                        key={project.id}
+                        className="block group relative cursor-pointer"
+                        onClick={() => navigate(`/project/${project.id}`)}
+                    >
                         <div className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm hover:shadow-lg transition-all border border-gray-100 dark:border-gray-700 h-full flex flex-col">
                             <div className="flex justify-between items-start mb-2">
                                 <h3 className="font-bold text-lg group-hover:text-blue-600 dark:group-hover:text-blue-400 dark:text-gray-100 transition-colors line-clamp-1">{project.title || "Untitled Project"}</h3>
                                 <button
                                     onClick={(e) => handleDelete(e, project.id)}
-                                    className="p-1.5 text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors"
+                                    className="p-1.5 text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors z-10"
                                     title="Delete Project"
                                 >
                                     <Trash2 size={16} />
@@ -131,7 +139,7 @@ export default function Dashboard() {
                                 <span>{new Date(project.created_at).toLocaleDateString()}</span>
                             </div>
                         </div>
-                    </Link>
+                    </div>
                 ))}
             </div>
             {projects.length === 0 && (

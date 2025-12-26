@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import ProjectView from './pages/ProjectView';
@@ -12,10 +13,10 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function App() {
-    //add ProtectedRoute later to Dashboard and ProjectView
     return (
         <ThemeProvider>
             <Router>
+                <Toaster position="top-right" />
                 <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
                     <Routes>
                         <Route path="/auth" element={<Auth />} />

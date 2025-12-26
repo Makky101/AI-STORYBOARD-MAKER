@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, RefreshCw, Image as ImageIcon, BookOpen, LayoutGrid, Edit3, Check, X, Download } from 'lucide-react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import ThemeToggle from '../components/ThemeToggle';
+import toast from 'react-hot-toast';
 
 export default function ProjectView() {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const { id } = useParams();
     const [project, setProject] = useState(null);
     const [scenes, setScenes] = useState([]);
@@ -21,7 +25,7 @@ export default function ProjectView() {
     const fetchProjectData = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`http://localhost:5000/api/projects/${id}`, {
+            const res = await axios.get(`${API_URL}/api/projects/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setProject(res.data.project);
@@ -37,13 +41,14 @@ export default function ProjectView() {
         setGeneratingImages(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.post(`http://localhost:5000/api/projects/${id}/generate-images`, {}, {
+            const res = await axios.post(`${API_URL}/api/projects/${id}/generate-images`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setScenes(res.data.scenes || res.data);
+            toast.success('Images generated!');
         } catch (err) {
             console.error("Error generating images:", err);
-            alert("Failed to generate images.");
+            toast.error("Failed to generate images.");
         } finally {
             setGeneratingImages(false);
         }
@@ -67,19 +72,44 @@ export default function ProjectView() {
     const saveEdit = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.put(`http://localhost:5000/api/projects/scenes/${editingSceneId}`, editForm, {
+            const res = await axios.put(`${API_URL}/api/projects/scenes/${editingSceneId}`, editForm, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setScenes(scenes.map(s => s.id === editingSceneId ? res.data : s));
             setEditingSceneId(null);
+            toast.success('Scene updated');
         } catch (err) {
             console.error(err);
-            alert("Failed to save changes");
+            toast.error("Failed to save changes");
         }
     };
 
-    const handleExport = () => {
-        window.print();
+    const handleExport = async () => {
+        const t = toast.loading('Preparing your PDF...');
+        const element = document.getElementById('storyboard-grid');
+        if (!element) return;
+
+        const canvas = await html2canvas(element, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff'
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4'
+        });
+
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`${project.title.replace(/\s+/g, '_')}_Storyboard.pdf`);
+        toast.success('Download ready!', { id: t });
     };
 
     if (loading) return <div className="text-center p-10 dark:text-gray-200">Loading Project...</div>;
@@ -142,11 +172,11 @@ export default function ProjectView() {
                         <button onClick={() => setShowScript(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 px-3 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Close</button>
                     </div>
 
-                    <div className="hidden lg:block text-lg font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wide mb-6">Script</div>
+                    <div className="hidden lg:block text-lg font-bold text-gray-700 dark:text-gray-200 uppercase tracking-widest mb-6" style={{ fontFamily: "'Outfit', sans-serif" }}>Script</div>
 
                     <div className="space-y-8 pb-10">
                         {scenes.map((scene) => (
-                            <div key={scene.id} className="group relative text-sm leading-relaxed" style={{ fontFamily: '"Courier Prime", "Courier New", Courier, monospace' }}>
+                            <div key={scene.id} className="group relative text-sm leading-relaxed" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                                 {editingSceneId === scene.id ? (
                                     <div className="space-y-3 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                                         <input
@@ -188,8 +218,7 @@ export default function ProjectView() {
                     </div>
                 </div>
 
-                {/* Right: Storyboard Grid */}
-                <div className="flex-1 overflow-y-auto p-4 lg:p-6 bg-gray-50 dark:bg-gray-900 transition-colors print:bg-white print:p-0 print:overflow-visible">
+                <div className="flex-1 overflow-y-auto p-4 lg:p-6 bg-gray-50 dark:bg-gray-900 transition-colors print:bg-white print:p-0 print:overflow-visible" id="storyboard-grid">
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 pb-10 print:grid-cols-2 print:gap-8">
                         {scenes.map((scene) => (
                             <div key={scene.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col h-full border border-gray-100 dark:border-gray-700 print:shadow-none print:border-gray-200">
