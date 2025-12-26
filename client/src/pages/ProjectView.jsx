@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Play, RefreshCw, Image as ImageIcon, BookOpen, LayoutGrid } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Image as ImageIcon, BookOpen, LayoutGrid, Edit3, Check, X, Download } from 'lucide-react';
 import ThemeToggle from '../components/ThemeToggle';
 
 export default function ProjectView() {
@@ -11,6 +11,8 @@ export default function ProjectView() {
     const [loading, setLoading] = useState(true);
     const [generatingImages, setGeneratingImages] = useState(false);
     const [showScript, setShowScript] = useState(false); // Mobile toggle
+    const [editingSceneId, setEditingSceneId] = useState(null);
+    const [editForm, setEditForm] = useState({});
 
     useEffect(() => {
         fetchProjectData();
@@ -35,7 +37,7 @@ export default function ProjectView() {
         setGeneratingImages(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.post(`http://localhost:5000/api/projects/generate-images/${id}`, {}, {
+            const res = await axios.post(`http://localhost:5000/api/projects/${id}/generate-images`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setScenes(res.data.scenes || res.data);
@@ -47,13 +49,46 @@ export default function ProjectView() {
         }
     };
 
+    const startEditing = (scene) => {
+        setEditingSceneId(scene.id);
+        setEditForm({ ...scene });
+    };
+
+    const cancelEditing = () => {
+        setEditingSceneId(null);
+        setEditForm({});
+    };
+
+    const handleEditChange = (e) => {
+        const { name, value } = e.target;
+        setEditForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const saveEdit = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.put(`http://localhost:5000/api/projects/scenes/${editingSceneId}`, editForm, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setScenes(scenes.map(s => s.id === editingSceneId ? res.data : s));
+            setEditingSceneId(null);
+        } catch (err) {
+            console.error(err);
+            alert("Failed to save changes");
+        }
+    };
+
+    const handleExport = () => {
+        window.print();
+    };
+
     if (loading) return <div className="text-center p-10 dark:text-gray-200">Loading Project...</div>;
     if (!project) return <div className="text-center p-10 dark:text-gray-200">Project not found</div>;
 
     return (
         <div className="flex flex-col h-[100dvh] bg-gray-100 dark:bg-gray-900 transition-colors">
             {/* Header */}
-            <header className="bg-white dark:bg-gray-800 shadow px-4 py-3 lg:px-6 lg:py-4 flex items-center justify-between z-10 transition-colors shrink-0">
+            <header className="bg-white dark:bg-gray-800 shadow px-4 py-3 lg:px-6 lg:py-4 flex items-center justify-between z-10 transition-colors shrink-0 print:hidden">
                 <div className="flex items-center gap-3 lg:gap-4 overflow-hidden">
                     <Link to="/" className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors shrink-0 flex items-center gap-2">
                         <ArrowLeft size={24} />
@@ -66,7 +101,6 @@ export default function ProjectView() {
                     </div>
                 </div>
                 <div className="flex items-center gap-2 lg:gap-3 shrink-0 ml-2">
-                    {/* Mobile/Tablet Script Toggle */}
                     <button
                         onClick={() => setShowScript(!showScript)}
                         className="lg:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
@@ -76,23 +110,31 @@ export default function ProjectView() {
                     </button>
 
                     <button
+                        onClick={handleExport}
+                        className="flex items-center gap-2 bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200 px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 text-sm font-medium transition-colors"
+                    >
+                        <Download size={16} />
+                        <span className="hidden sm:inline">Export PDF</span>
+                    </button>
+
+                    <button
                         onClick={handleGenerateImages}
                         disabled={generatingImages}
                         className="flex items-center gap-2 bg-purple-600 text-white px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg hover:bg-purple-700 disabled:opacity-50 text-sm font-medium transition-colors shadow-sm"
                     >
                         {generatingImages ? <RefreshCw className="animate-spin" size={16} /> : <ImageIcon size={16} />}
-                        <span className="hidden sm:inline">{generatingImages ? 'Generating...' : 'Generate Art'}</span>
+                        <span className="hidden sm:inline">{generatingImages ? 'Generate Art' : 'Generate Art'}</span>
                     </button>
                     <ThemeToggle />
                 </div>
             </header>
 
             {/* Main Content - Split View */}
-            <div className="flex flex-1 overflow-hidden relative">
+            <div className="flex flex-1 overflow-hidden relative print:block print:overflow-visible">
 
                 {/* Left: Script View (Responsive Toggle) */}
                 <div className={`
-                    absolute inset-0 z-20 lg:relative lg:z-0 w-full lg:w-1/3 bg-white dark:bg-gray-800 border-r dark:border-gray-700 overflow-y-auto p-6 transition-transform duration-300 ease-in-out
+                    absolute inset-0 z-20 lg:relative lg:z-0 w-full lg:w-1/3 bg-white dark:bg-gray-800 border-r dark:border-gray-700 overflow-y-auto p-6 transition-transform duration-300 ease-in-out print:hidden
                     ${showScript ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
                 `}>
                     <div className="flex justify-between items-center mb-4 lg:hidden">
@@ -104,21 +146,42 @@ export default function ProjectView() {
 
                     <div className="space-y-8 pb-10">
                         {scenes.map((scene) => (
-                            <div key={scene.id} className="text-sm leading-relaxed" style={{ fontFamily: '"Courier Prime", "Courier New", Courier, monospace' }}>
-                                <div className="font-bold text-gray-900 dark:text-gray-100 mb-2 uppercase tracking-widest text-xs border-b border-gray-200 dark:border-gray-700 pb-2">
-                                    {scene.scene_number}. {scene.location.toUpperCase()} - {scene.time ? scene.time.toUpperCase() : 'DAY'}
-                                </div>
-                                <div className="text-gray-500 dark:text-gray-400 mb-4 text-xs italic tracking-wide">Mood: {scene.mood}</div>
-
-                                <div className="text-gray-800 dark:text-gray-300 mb-4 px-4 lg:px-0">
-                                    {scene.action}
-                                </div>
-
-                                {scene.description && (
-                                    <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg border-l-4 border-purple-400 dark:border-purple-600 text-gray-700 dark:text-gray-300 shadow-sm mx-2 lg:mx-0">
-                                        <span className="block text-xs font-bold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">Note</span>
-                                        {scene.description}
+                            <div key={scene.id} className="group relative text-sm leading-relaxed" style={{ fontFamily: '"Courier Prime", "Courier New", Courier, monospace' }}>
+                                {editingSceneId === scene.id ? (
+                                    <div className="space-y-3 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                                        <input
+                                            name="location"
+                                            value={editForm.location}
+                                            onChange={handleEditChange}
+                                            className="w-full bg-white dark:bg-gray-700 border dark:border-gray-600 p-1 rounded font-bold uppercase"
+                                        />
+                                        <textarea
+                                            name="action"
+                                            value={editForm.action}
+                                            onChange={handleEditChange}
+                                            className="w-full bg-white dark:bg-gray-700 border dark:border-gray-600 p-1 rounded min-h-[100px]"
+                                        />
+                                        <div className="flex gap-2">
+                                            <button onClick={saveEdit} className="flex items-center gap-1 bg-green-600 text-white px-2 py-1 rounded text-xs"><Check size={14} /> Save</button>
+                                            <button onClick={cancelEditing} className="flex items-center gap-1 bg-gray-500 text-white px-2 py-1 rounded text-xs"><X size={14} /> Cancel</button>
+                                        </div>
                                     </div>
+                                ) : (
+                                    <>
+                                        <div className="font-bold text-gray-900 dark:text-gray-100 mb-2 uppercase tracking-widest text-xs border-b border-gray-200 dark:border-gray-700 pb-2 flex justify-between items-center">
+                                            <span>{scene.scene_number}. {scene.location.toUpperCase()} - {scene.time ? scene.time.toUpperCase() : 'DAY'}</span>
+                                            <button
+                                                onClick={() => startEditing(scene)}
+                                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded"
+                                            >
+                                                <Edit3 size={14} />
+                                            </button>
+                                        </div>
+                                        <div className="text-gray-500 dark:text-gray-400 mb-4 text-xs italic tracking-wide">Mood: {scene.mood}</div>
+                                        <div className="text-gray-800 dark:text-gray-300 mb-4 px-4 lg:px-0">
+                                            {scene.action}
+                                        </div>
+                                    </>
                                 )}
                             </div>
                         ))}
@@ -126,10 +189,10 @@ export default function ProjectView() {
                 </div>
 
                 {/* Right: Storyboard Grid */}
-                <div className="flex-1 overflow-y-auto p-4 lg:p-6 bg-gray-50 dark:bg-gray-900 transition-colors">
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 pb-10">
+                <div className="flex-1 overflow-y-auto p-4 lg:p-6 bg-gray-50 dark:bg-gray-900 transition-colors print:bg-white print:p-0 print:overflow-visible">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 pb-10 print:grid-cols-2 print:gap-8">
                         {scenes.map((scene) => (
-                            <div key={scene.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col h-full border border-gray-100 dark:border-gray-700">
+                            <div key={scene.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col h-full border border-gray-100 dark:border-gray-700 print:shadow-none print:border-gray-200">
                                 {/* Image Area */}
                                 <div className="relative aspect-video bg-gray-100 dark:bg-gray-900 flex items-center justify-center group overflow-hidden">
                                     {scene.image_url ? (
@@ -153,7 +216,7 @@ export default function ProjectView() {
                                 <div className="p-4 flex-1 flex flex-col">
                                     <h3 className="font-bold text-gray-900 dark:text-white mb-1 line-clamp-1 text-sm">{scene.title || `Scene ${scene.scene_number}`}</h3>
                                     <p className="text-xs text-purple-600 dark:text-purple-400 font-medium mb-2 uppercase tracking-wide">{scene.location}</p>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-3 leading-relaxed">{scene.action}</p>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-3 leading-relaxed print:line-clamp-none">{scene.action}</p>
                                 </div>
                             </div>
                         ))}

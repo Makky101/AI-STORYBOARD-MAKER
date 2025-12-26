@@ -112,4 +112,47 @@ router.post('/:id/generate-images', auth, aiLimiter, async (req, res) => {
     }
 });
 
+// Delete project and scenes (using cascade or manual)
+router.delete('/:id', auth, async (req, res) => {
+    try {
+        // 1. Check ownership
+        const project = await db.query('SELECT * FROM projects WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+        if (project.rows.length === 0) return res.status(404).send('Project not found');
+
+        // 2. Delete project (scenes should be deleted via ON DELETE CASCADE in DB)
+        await db.query('DELETE FROM projects WHERE id = $1', [req.params.id]);
+
+        res.json({ message: 'Project deleted successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
+// Update a scene
+router.put('/scenes/:sceneId', auth, async (req, res) => {
+    try {
+        const { sceneId } = req.params;
+        const { title, location, description, action, mood } = req.body;
+
+        // 1. Check ownership (via project connection)
+        const sceneCheck = await db.query(
+            'SELECT s.* FROM scenes s JOIN projects p ON s.project_id = p.id WHERE s.id = $1 AND p.user_id = $2',
+            [sceneId, req.user.id]
+        );
+        if (sceneCheck.rows.length === 0) return res.status(404).send('Scene not found or unauthorized');
+
+        // 2. Update scene
+        const result = await db.query(
+            'UPDATE scenes SET title = $1, location = $2, description = $3, action = $4, mood = $5 WHERE id = $6 RETURNING *',
+            [title, location, description, action, mood, sceneId]
+        );
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
 export default router;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import { PlusCircle, Film } from 'lucide-react';
+import { PlusCircle, Film, Trash2 } from 'lucide-react';
 import ThemeToggle from '../components/ThemeToggle';
 
 export default function Dashboard() {
@@ -47,6 +47,24 @@ export default function Dashboard() {
             alert('Failed to create project');
         } finally {
             setIsCreating(false);
+        }
+    };
+
+    const handleDelete = async (e, id) => {
+        e.preventDefault(); // Stop Link navigation
+        e.stopPropagation();
+
+        if (!confirm('Are you sure you want to delete this project?')) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            await axios.delete(`http://localhost:5000/api/projects/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setProjects(projects.filter(p => p.id !== id));
+        } catch (err) {
+            console.error(err);
+            alert('Failed to delete project');
         }
     };
 
@@ -96,9 +114,18 @@ export default function Dashboard() {
             {/* Projects Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {projects.map((project) => (
-                    <Link to={`/project/${project.id}`} key={project.id} className="block group">
+                    <Link to={`/project/${project.id}`} key={project.id} className="block group relative">
                         <div className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm hover:shadow-lg transition-all border border-gray-100 dark:border-gray-700 h-full flex flex-col">
-                            <h3 className="font-bold text-lg mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 dark:text-gray-100 transition-colors">{project.title || "Untitled Project"}</h3>
+                            <div className="flex justify-between items-start mb-2">
+                                <h3 className="font-bold text-lg group-hover:text-blue-600 dark:group-hover:text-blue-400 dark:text-gray-100 transition-colors line-clamp-1">{project.title || "Untitled Project"}</h3>
+                                <button
+                                    onClick={(e) => handleDelete(e, project.id)}
+                                    className="p-1.5 text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors"
+                                    title="Delete Project"
+                                >
+                                    <Trash2 size={16} />
+                                </button>
+                            </div>
                             <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-3 flex-1 transition-colors">{project.original_input}</p>
                             <div className="mt-4 text-xs text-gray-400 dark:text-gray-500 transition-colors border-t dark:border-gray-700 pt-3 flex justify-between">
                                 <span>{new Date(project.created_at).toLocaleDateString()}</span>
