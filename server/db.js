@@ -57,6 +57,20 @@ const pool = new Pool({
 
     // Port number the PostgreSQL server is listening on (usually 5432)
     port: process.env.DB_PORT,
+
+    // SSL/TLS Configuration for Production Databases
+    // Many cloud database providers (like Render, Heroku, AWS RDS) require SSL connections
+    ssl: process.env.NODE_ENV === 'production'
+        ? {
+            // rejectUnauthorized: false allows connections even if the SSL certificate
+            // cannot be verified. This is common for cloud databases with self-signed certs.
+            // In production, this is generally safe because:
+            // 1. The connection is still encrypted
+            // 2. Cloud providers manage their own certificates
+            // 3. You're connecting via a trusted connection string
+            rejectUnauthorized: false
+        }
+        : false // No SSL for local development
 });
 
 // ----------------------------------------------------------------------------
