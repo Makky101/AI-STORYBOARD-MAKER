@@ -9,11 +9,9 @@ const router = express.Router();
 router.post('/register', async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log(email, password);
 
         // Check if user exists
         const userExist = await db.query('SELECT * FROM users WHERE email = $1', [email]);
-        console.log(userExist.rows);
         if (userExist.rows.length > 0) return res.status(400).send('Email already exists');
 
         // Hash password

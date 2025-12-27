@@ -57,7 +57,7 @@ async function generateScript(input) {
 
         // Get the specific AI model we want to use
         // "gemini-1.5-flash" is a fast, efficient model good for text generation
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
         // --------------------------------------------------------------------
         // Step 1.3: Create the prompt for the AI

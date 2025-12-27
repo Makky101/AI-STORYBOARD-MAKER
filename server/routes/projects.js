@@ -210,8 +210,6 @@ router.get('/:id', auth, async (req, res) => {
 router.post('/:id/generate-images', auth, aiLimiter, async (req, res) => {
     try {
         // Log for debugging
-        console.log(`Request received for Project ID: ${req.params.id}`);
-
         // --------------------------------------------------------------------
         // Step 4.1: Verify project ownership
         // --------------------------------------------------------------------
@@ -233,8 +231,6 @@ router.post('/:id/generate-images', auth, aiLimiter, async (req, res) => {
             [req.params.id]
         );
 
-        console.log(`Found ${scenes.rows.length} scenes to process`);
-
         // --------------------------------------------------------------------
         // Step 4.3: Generate images for each scene
         // --------------------------------------------------------------------
@@ -249,8 +245,6 @@ router.post('/:id/generate-images', auth, aiLimiter, async (req, res) => {
             // Only generate if the scene doesn't already have an image
             if (!scene.image_url) {
                 try {
-                    console.log(`Generating image for scene ${scene.scene_number}...`);
-
                     // Call Hugging Face API to generate the image
                     const imageUrl = await generateImage(scene.image_prompt);
 
@@ -277,8 +271,6 @@ router.post('/:id/generate-images', auth, aiLimiter, async (req, res) => {
 
         // Wait for all image generations to complete
         const updatedScenes = await Promise.all(imagePromises);
-
-        console.log("All scenes processed successfully.");
 
         // --------------------------------------------------------------------
         // Step 4.4: Send updated scenes back to client
