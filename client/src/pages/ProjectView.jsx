@@ -208,6 +208,7 @@ export default function ProjectView() {
         }
     };
 
+    /*
     // ========================================================================
     // FUNCTION 7: Export Storyboard as PDF
     // ========================================================================
@@ -253,6 +254,7 @@ export default function ProjectView() {
         // Update the loading toast to success
         toast.success('Download ready!', { id: t });
     };
+    */
 
     // ========================================================================
     // LOADING AND ERROR STATES
@@ -307,6 +309,7 @@ export default function ProjectView() {
                     </button>
 
                     {/* Export PDF button */}
+                    {/*
                     <button
                         onClick={handleExport}
                         className="flex items-center gap-2 bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200 px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 text-sm font-medium transition-colors"
@@ -314,7 +317,8 @@ export default function ProjectView() {
                         <Download size={16} />
                         <span className="hidden sm:inline">Export PDF</span>
                     </button>
-
+                    */}
+                    
                     {/* Generate images button */}
                     <button
                         onClick={handleGenerateImages}
