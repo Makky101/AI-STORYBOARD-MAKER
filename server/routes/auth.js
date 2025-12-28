@@ -20,9 +20,11 @@ router.post('/register', async (req, res) => {
 
         // Insert user
         const newUser = await db.query(
-            'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email',
+            'INSERT INTO users (email, password_hash) VALUES ($1, $2) ON CONFLICT(email) DO NOTHING RETURNING id, email;',
             [email, hashedPassword]
         );
+
+        if(newUser.rowCount === 0) return res.status(409).json({error: 'Email has already been used'})
 
         res.json(newUser.rows[0]);
     } catch (err) {
