@@ -10,10 +10,6 @@ router.post('/register', async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Check if user exists
-        const userExist = await db.query('SELECT * FROM users WHERE email = $1', [email]);
-        if (userExist.rows.length > 0) return res.status(400).send('Email already exists');
-
         // Hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
@@ -48,7 +44,7 @@ router.post('/login', async (req, res) => {
 
         // Create and assign token
         const token = jwt.sign({ id: user.rows[0].id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.header('Authorization', token).json({ token, user: { id: user.rows[0].id, email: user.rows[0].email } });
+        res.header('Authorization', token).json({ token, user: { id: user.rows[0].id } });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');

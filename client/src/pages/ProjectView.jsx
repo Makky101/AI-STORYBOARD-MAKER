@@ -25,10 +25,6 @@ import { useParams, Link } from 'react-router-dom';
 // Lucide React: Icon library
 import { ArrowLeft, RefreshCw, Image as ImageIcon, BookOpen, LayoutGrid, Edit3, Check, X, Download } from 'lucide-react';
 
-// PDF generation libraries
-import jsPDF from 'jspdf';           // Creates PDF files
-import html2canvas from 'html2canvas'; // Converts HTML to images for PDF
-
 // Toast notifications
 import toast from 'react-hot-toast';
 
@@ -208,54 +204,6 @@ export default function ProjectView() {
         }
     };
 
-    /*
-    // ========================================================================
-    // FUNCTION 7: Export Storyboard as PDF
-    // ========================================================================
-    // This converts the storyboard grid to a PDF file
-    const handleExport = async () => {
-        // Show loading toast
-        const t = toast.loading('Preparing your PDF...');
-
-        // Get the storyboard grid element
-        const element = document.getElementById('storyboard-grid');
-        if (!element) return;
-
-        // Convert the HTML element to a canvas (image)
-        const canvas = await html2canvas(element, {
-            scale: 2,              // Higher quality (2x resolution)
-            useCORS: true,         // Allow cross-origin images
-            logging: false,        // Don't log to console
-            backgroundColor: '#ffffff'  // White background
-        });
-
-        // Convert the canvas to a data URL (base64 image)
-        const imgData = canvas.toDataURL('image/png');
-
-        // Create a new PDF document
-        const pdf = new jsPDF({
-            orientation: 'portrait',  // Vertical orientation
-            unit: 'mm',               // Millimeters
-            format: 'a4'              // A4 paper size
-        });
-
-        // Get image dimensions and calculate how to fit it on the PDF
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-        // Add the image to the PDF
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-
-        // Download the PDF
-        // Replace spaces in title with underscores for the filename
-        pdf.save(`${project.title.replace(/\\s+/g, '_')}_Storyboard.pdf`);
-
-        // Update the loading toast to success
-        toast.success('Download ready!', { id: t });
-    };
-    */
-
     // ========================================================================
     // LOADING AND ERROR STATES
     // ========================================================================
@@ -308,18 +256,6 @@ export default function ProjectView() {
                         {showScript ? <LayoutGrid size={20} /> : <BookOpen size={20} />}
                     </button>
 
-                    {/* Export PDF button */}
-                    {/*
-                    <button
-                        onClick={handleExport}
-                        className="flex items-center gap-2 bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200 px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 text-sm font-medium transition-colors"
-                    >
-                        <Download size={16} />
-                        <span className="hidden sm:inline">Export PDF</span>
-                    </button>
-                    */}
-                    
-                    {/* Generate images button */}
                     <button
                         onClick={handleGenerateImages}
                         disabled={generatingImages}

@@ -1,10 +1,9 @@
 import { rateLimit } from 'express-rate-limit';
 
-// Standard API rate limiter
 export const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    limit: 100, // Limit each IP to 100 requests per 15 mins
-    standardHeaders: true, // Use standard headers for rate limit info
+    windowMs: 15 * 60 * 1000, 
+    limit: 100, 
+    standardHeaders: true, 
     legacyHeaders: false,
     validate: false,
     message: {
@@ -13,10 +12,10 @@ export const apiLimiter = rateLimit({
     }
 });
 
-// Stricter limiter for AI generation (Script/Image)
+
 export const aiLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    limit: 10, // Limit to 10 AI generation requests per hour
+    windowMs: 60 * 60 * 1000, 
+    limit: 10, 
     standardHeaders: true,
     legacyHeaders: false,
     validate: false,
