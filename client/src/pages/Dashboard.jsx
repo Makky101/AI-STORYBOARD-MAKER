@@ -32,7 +32,7 @@ export default function Dashboard() {
         } catch (err) {
             console.error(err);
 
-            if (err.response?.status === 401) {
+            if (err.response?.status === 400) {
                 navigate('/auth');
             }
         }
