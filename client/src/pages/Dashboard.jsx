@@ -98,9 +98,9 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="container mx-auto p-6 max-w-5xl">
-            <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold flex items-center gap-3 dark:text-white transition-colors"
+        <div className="mx-auto p-6 max-w-5xl transition-colors">
+            <div className="flex justify-between mb-8">
+                <h1 className="text-3xl font-bold flex items-center gap-3"
                     style={{ fontFamily: "'Outfit', sans-serif" }}>
                     <img src="/logo.png" alt="Sketcha Logo" className="w-10 h-10 rounded-lg shadow-sm" />
                     Sketcha
@@ -112,14 +112,14 @@ export default function Dashboard() {
                             localStorage.removeItem('token');
                             navigate('/auth');
                         }}
-                        className="text-gray-600 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
+                        className="text-gray-600 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
                     >
                         Logout
                     </button>
                 </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-10 border border-blue-100 dark:border-gray-700 transition-colors">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-10 border border-blue-100 dark:border-gray-700">
                 <h2 className="text-xl font-semibold mb-4 dark:text-white transition-colors">
                     Create New Storyboard
                 </h2>

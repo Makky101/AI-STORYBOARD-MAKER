@@ -57,7 +57,7 @@ export default function Auth() {
                     <img
                         src="/icon.png"
                         alt="Sketcha Logo"
-                        className="w-16 h-16 rounded-xl shadow-lg ring-4 ring-blue-50 dark:ring-blue-900/30"
+                        className="w-16 h-16 rounded-xl shadow-lg ring-4 ring-blue-5 dark:ring-blue-900/30"
                     />
                 </div>
                 <h2 className="text-2xl font-bold mb-6 text-center text-gray-900 dark:text-white transition-colors">
