@@ -43,8 +43,6 @@ CREATE TABLE scenes (
 -- INDEXES
 CREATE INDEX idx_projects_user_id ON projects(user_id);
 CREATE INDEX idx_scenes_project_id ON scenes(project_id);
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_email ON users(email);
 
 COMMENT ON TABLE users IS 'Stores user authentication and account information';
 COMMENT ON TABLE projects IS 'Stores storyboard projects created by users';

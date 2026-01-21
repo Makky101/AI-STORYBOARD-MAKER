@@ -15,4 +15,4 @@ const pool = new Pool({
         : false
 });
 
-export const query = (text, params) => pool.query(text, params);
+export const query = (cmd, values) => pool.query(cmd, values);

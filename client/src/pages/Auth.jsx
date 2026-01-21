@@ -8,7 +8,7 @@ export default function Auth() {
 
     const navigate = useNavigate();
 
-    const [isLogin, setIsLogin] = useState(true);
+    const [isLogin, setIsLogin] = useState(false);
 
     const [email, setEmail] = useState('');
 

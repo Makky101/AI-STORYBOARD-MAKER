@@ -32,7 +32,7 @@ export default function Dashboard() {
         } catch (err) {
             console.error(err);
 
-            if (err.response?.status === 400) {
+            if (err.response?.status === 400){
                 navigate('/auth');
             }
         }
@@ -47,8 +47,7 @@ export default function Dashboard() {
         try {
             const token = localStorage.getItem('token');
 
-            const title = newProjectInput.substring(0, 30) +
-                (newProjectInput.length > 30 ? '...' : '');
+            const title = newProjectInput.substring(0, 30) + (newProjectInput.length > 30 ? '...' : '');
 
             const res = await axios.post(
                 `${API_URL}/api/projects/`,
